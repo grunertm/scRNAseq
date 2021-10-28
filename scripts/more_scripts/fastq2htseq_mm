@@ -1,0 +1,44 @@
+#!bash
+
+# prepare STAR index mouse
+# following https://www.biostars.org/p/221781/
+cd /scratch/AG_Sauer/cfischer/resources
+mkdir /scratch/AG_Sauer/cfischer/resources/STARindex/gc_vM11_GRCm38_75nt
+# http://www.gencodegenes.org/mouse_releases/current.html
+wget -b ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_mouse/release_M11/gencode.vM11.primary_assembly.annotation.gtf.gz
+wget -b ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_mouse/release_M11/GRCm38.primary_assembly.genome.fa.gz
+gunzip *.gz
+qlogin -l h_vmem=60G # to have enough memory! # cfische@max074.mdc-berlin.net
+STAR --runThreadN 5 --runMode genomeGenerate --genomeDir /scratch/AG_Sauer/cfischer/resources/STARindex/gc_vM11_GRCm38_75nt --genomeFastaFiles /scratch/AG_Sauer/cfischer/resources/GRCm38.primary_assembly.genome.fa --sjdbGTFfile /scratch/AG_Sauer/cfischer/resources/gencode.vM11.primary_assembly.annotation.gtf --sjdbOverhang 75 &
+
+# map mm10
+qlogin -l h_vmem=70G #
+# cd to workdir
+mkdir -p {temp,temp/STARmapping,sam,logs};
+find fastq/*R1* | sed 's/_R1\.fastq//g'| sed 's/fastq\///g' | parallel -j4 \
+'mkdir temp/STARmapping/{}; cd temp/STARmapping/{}; \
+STAR --genomeLoad LoadAndKeep --genomeDir /scratch/AG_Sauer/cfischer/resources/STARindex/gc_vM11_GRCm38_75nt/ --readFilesIn ../../../fastq/{}_R1.fastq ../../../fastq/{}_R2.fastq --runThreadN 4; \
+cd ../../../; \
+mv temp/STARmapping/{}/Aligned.out.sam sam/{}.sam; \
+mv temp/STARmapping/{} logs/'&
+
+#htseq mm10
+cd sam
+find *.sam | sed 's/\.sam//g' | parallel -j13 'htseq-count -f sam -q -i gene_id {}.sam /scratch/AG_Sauer/cfischer/resources/gencode.vM11.primary_assembly.annotation.gtf > {}_count.txt'&
+
+
+#!R
+# combine tablr
+library(reshape2)
+files <- list.files(path = "/scratch/AG_Sauer/cfischer/project/20170116_Birch02/sam", pattern="count", full.names = T)
+cdata <- do.call("rbind", lapply(files, function(fn)  data.frame(Filename=fn, read.table(fn, header=F, sep="\t"))))
+cdata$cell<-gsub("/scratch/AG_Sauer/cfischer/project/20170116_Birch02/sam/CB_IL_..._", "", cdata$Filename)
+cdata$cell<-gsub("_L00X_count.txt", "", cdata$cell)
+cdata_wide<-dcast(cdata,V1~cell, value.var="V2")
+cdata_wide = cdata_wide[-1:-5,]
+row.names(cdata_wide)<-cdata_wide$V1
+cdata_wide$V1<-NULL
+row.names(cdata_wide)<-gsub("\\..*","",row.names(cdata_wide))
+#write.table(cdata_wide, "CB_IL_P02_htseqmm10.txt", quote=F)
+cdata$Filename<-NULL
+#write.table(cdata, "CB_IL_P02_htseqmm10_long.txt", quote=F)

@@ -1,0 +1,28 @@
+CPM	SHF	Ht	BM	CT
+Nrg1	Hopx	Hopx	Mef2c	Scx
+Mef2c	Mef2c	Nrg1	Prox1	Sox6
+Six1	Prox1	Mef2c	Six1	Sox9
+Fgf10	Six1	Prox1	Ebf1	Mroh2a
+Six2	Fgf10	Pitx2	Ebf2	Rbfa
+Kdr	Six2	Shox2	Edn1	Ocel1
+Kazald1	Tlx1	Osr1	Hgf	Grina
+Isl1	Hoxb1	Gata6	Frzb	Ppm1h
+Tbx1	Osr1	Nkx2-5	Chrdl1	Hpn
+Arg1	Nkx2-5	Isl1	Myf5	Slc6a7
+Tcf21	Isl1	Tbx1	Pitx2	Dcaf17
+Hoxa1	Tbx1	Hoxa1	Lrrn1	Kcnj11
+Hoxb5	Arg1	Six2	Six2	Ptprg
+Aplnr	Tcf21	Ppm1h	Lhx2	Dll4
+Prdm1	Hoxa1	Bmp7	Six4	Qprt
+Six2	Hoxb5	Bmp4	Tlx1	Car8
+Meox1	Aplnr	Acta2	Isl1	Egr1
+Vamp5	Prdm1	Pitx2	Tbx1	Tcf4
+Cd40	Six2		Tcf21	
+	Meox1		Six2	
+	Vamp5		Ppm1h	
+	Cd40		Acta2	
+	Dach1		Myog	
+			MyoD	
+			Pitx2	
+			Eya2	
+			En2	
